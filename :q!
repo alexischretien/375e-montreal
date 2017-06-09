@@ -1,0 +1,203 @@
+package ca.uqam.projet.repositories;
+
+import java.util.*;
+import java.util.stream.*;
+import java.sql.*;
+
+import ca.uqam.projet.resources.*;
+
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.dao.*;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.support.*;
+import org.springframework.stereotype.*;
+
+@Component
+public class PisteRepository {
+
+  @Autowired private JdbcTemplate jdbcTemplate;
+
+  /*
+  private static final String FIND_BY_RADIUS =
+      " select"
+    + "     id, s,  n,  st, b,  su, m,  lu, lc,"
+    + "     bk, bl, la, lo, da, dx, ba, bx"
+    + " from"
+    + "   bixis"
+    + " where"
+    + "   ba >= ? and"
+    + "   ST_Distance_Sphere(coordonnees, ST_GeomFromText(?,4326)) <= ?"
+    ;
+
+  public List<Bixi> findByRadius(int min_bixi_dispo, double rayon, 
+                                 double lng, double lat) {
+
+    return jdbcTemplate.query(conn -> {
+      PreparedStatement ps = conn.prepareStatement(FIND_BY_RADIUS);
+      ps.setInt   (1, min_bixi_dispo);
+      ps.setString(2, String.format("POINT(%f %f)", lng, lat));
+      ps.setDouble(3, rayon);
+      return ps;
+    }, new BixiRowMapper());
+  } 
+*/
+  /*
+  private static final String FIND_FOR_GEO_UPDATE =
+      " select"
+    + "    *"  
+    + " from"
+    + "    activites"
+    + " where"
+    + "    geo_a_jour = false and"
+    + "    lieux is not null"
+    + " limit 25"
+    ; 
+
+  public List<Activite> findForGeoUpdate() {
+    return jdbcTemplate.query(FIND_FOR_GEO_UPDATE, new ActiviteRowMapper());
+  }
+
+*//*
+  private static final String FIND_BY_ID_STMT =
+      " select"
+    + "     id, s,  n,  st, b,  su, m,  lu, lc,"
+    + "     bk, bl, la, lo, da, dx, ba, bx"
+    + " from"
+    + "   bixis"
+    + " where"
+    + "   id = ?"
+    ;
+
+  public Bixi findById(int id) {
+    return jdbcTemplate.queryForObject(FIND_BY_ID_STMT, new Object[]{id}, new BixiRowMapper());
+  }
+  */
+
+/*
+  private static final String FIND_BY_CONTENU_STMT =
+      " select"
+    + "     id"
+    + "   , ts_headline(contenu, q, 'HighlightAll = true') as contenu"
+    + "   , auteur"
+    + " from"
+    + "     citations"
+    + "   , to_tsquery(?) as q"
+    + " where"
+    + "   contenu @@ q"
+    + " order by"
+    + "   ts_rank_cd(to_tsvector(contenu), q) desc"
+    ;
+  public List<Citation> findByContenu(String... tsterms) {
+    String tsquery = Arrays.stream(tsterms).collect(Collectors.joining(" & "));
+    return jdbcTemplate.query(FIND_BY_CONTENU_STMT, new Object[]{tsquery}, new CitationRowMapper());
+  }
+*/
+  private static final String INSERT_STMT =
+      " insert into pistes (id, id_trc_geobase, type_voie, type_voie2,"
+    + "                     longueur, nbr_voie, separateur, saisons4," 
+    + "                     protege_4s, ville_mtl, nom_arr_ville," 
+    + "                     str_chemin, chemin)"
+    + " values (?,?,?,?,?,?,?,?,?,?,?,?,ST_Transform(ST_GeomFromText(?, 2950), 4326))"
+    + " on conflict (id) do update"
+    + " set"  
+    + "       id_trc_geobase = ?"
+    + "     , type_voie      = ?"
+    + "     , type_voie2     = ?"
+    + "     , longueur       = ?"
+    + "     , nbr_voie       = ?"
+    + "     , separateur     = ?"
+    + "     , saisons4       = ?"
+    + "     , protege_4s     = ?"
+    + "     , ville_mtl      = ?"
+    + "     , nom_arr_ville  = ?"
+    + "     , str_chemin     = ?"
+    + "     , chemin         = ST_Transform(ST_GeomFromText(?, 2950), 4326)"
+    ;
+
+  public int insert(Piste piste) {
+    return jdbcTemplate.update(conn -> {
+      PreparedStatement ps = conn.prepareStatement(INSERT_STMT);
+
+/**
+*
+*/    
+
+System.out.println("\n\n\n VOICI LES COORDINNÉES : " + formatLineString(piste.getCoordinates()) + "\n\n\n");
+/**
+ *
+ *
+ *
+*/
+
+      ps.setDouble(1,  piste.getId());
+      ps.setDouble(2,  piste.getId_trc_geobase());
+      ps.setInt   (3,  piste.getType_voie());
+      ps.setInt   (4,  piste.getType_voie2());
+      ps.setInt   (5,  piste.getLongueur());
+      ps.setInt   (6,  piste.getNbr_voie());
+      ps.setString(7,  piste.getSeparateur());
+      ps.setString(8,  piste.getSaisons4());
+      ps.setString(9,  piste.getProtege_4s());
+      ps.setString(10, piste.getVille_mtl());
+      ps.setString(11, piste.getNom_arr_ville());
+      ps.setString(12, piste.getCoordinates());
+      ps.setString(13, formatLineString(piste.getCoordinates())); 
+
+      ps.setDouble(14, piste.getId_trc_geobase());
+      ps.setInt   (15, piste.getType_voie());
+      ps.setInt   (16, piste.getType_voie2());
+      ps.setInt   (17, piste.getLongueur());
+      ps.setInt   (18, piste.getNbr_voie());
+      ps.setString(19, piste.getSeparateur());
+      ps.setString(20, piste.getSaisons4());
+      ps.setString(21, piste.getProtege_4s());
+      ps.setString(22, piste.getVille_mtl());
+      ps.setString(23, piste.getNom_arr_ville());
+      ps.setString(24, piste.getCoordinates());
+      ps.setString(25, formatLineString(piste.getCoordinates()));
+
+      return ps;
+    });
+  }/*
+  public String fromPathToString(List<Coordonnees> coord) {
+ 
+    String pathString = "";
+
+    for (Coordonnees c : coord) {
+      pathString += String.format(",%s %s", c.getLon(), c.getLat());
+    }
+    return  pathString.replaceFirst(",","");
+
+  } */
+
+  String formatLineString(String coord) {
+    return  "LINESTRING(" + coord.replaceAll("( \\], \\[ )", ",")
+                    .replaceAll("(, )", " ")
+                    .replaceAll("(\\[ \\[ )","")
+                    .replaceAll(" \\] \\]", "")  
+                    + ")";
+
+
+  }
+
+} 
+
+
+class PisteRowMapper implements RowMapper<Piste> {
+  public Piste mapRow(ResultSet rs, int rowNum) throws SQLException {
+    return new Piste(
+        rs.getDouble("id")
+      , rs.getDouble("id_trc_geobase")
+      , rs.getInt   ("type_voie")
+      , rs.getInt   ("type_voie2")
+      , rs.getInt   ("longueur")
+      , rs.getInt   ("nbr_voie")
+      , rs.getString("separateur")
+      , rs.getString("saisons4")
+      , rs.getString("protege_4s")
+      , rs.getString("ville_mtl")
+      , rs.getString("nom_arr_ville")
+      , rs.getString("str_chemin")
+    ); 
+  } 
+}

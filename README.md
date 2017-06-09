@@ -1,4 +1,21 @@
-# Projet de démarrage
+# inf4375-projet-e2017
+
+Projet d'un site web basé sur le framework Spring-Boot utilisant des interfaces
+programmatiques de type REST HTTP/JSON et une interface visuelle de type Ajax dans 
+le cadre du cours INF4375 - Paradigmes des échanges internet.
+
+Le site web offre des fonctionnalités permettant d'obtenir des informations
+relatives aux activités de 375e de la Ville de Montréal ainsi que des stations bixis
+et des pistes cyclables. 
+
+Le système utilise une base de données Postgrsql pour sauvegarder les informations
+des activités, des stations bixis et des pistes cyclables. Des requêtes à l'API de 
+géocodage de Google sont périodiquement envoyées pour récupérer les coordonnées 
+géographiques des activités du 375e.
+
+## Auteur
+
+Alexis Chrétien (CHRA25049209)
 
 ## Prérequis
 
@@ -13,13 +30,63 @@
 
 ## Compilation et exécution
 
+- Vérifier que le mode d'autentification de l'utilisateur postgresql `postgres`
+  est de type `md5` dans le fichier `pg\bha.conf` :
+
+    $ /etc/postgresql/9.X/main/pg\_hba.conf
+
+- Installation de la base de données, des tables et des triggers : 
+
+    $ psql -U postgres -f migrations/create-database.sql
+    $ psql -U postgres -f migrations/create-schema.sql screencasts
+
+- Compilisation et exécution : 
+
     $ mvn spring-boot:run
 
 Le projet est alors disponible à l'adresse [http://localhost:8080/](http://localhost:8080/)
 
+## Status
+
+- [ ] Module A
+  - [ ] A1 (5XP)
+  - [x] A2 (8XP)
+  - [x] A3 (5XP)
+  - [ ] A4 (5XP)
+- [ ] Module B
+  - [ ] B1 (5XP)
+  - [ ] B2 (5XP)
+  - [ ] B3 (5XP)
+  - [ ] B4 (2XP)
+- [ ] Module C
+  - [x] C1 (5XP)
+  - [x] C2 (2XP)
+  - [x] C3 (5XP)
+  - [ ] C4 (5CP)
+- [ ] Module D
+  - [x] D1 (5XP)
+  - [x] D2 (10XP)
+  - [ ] D3 (5XP)
+- [ ] Module E
+  - [ ] E1 (10XP)
+  - [ ] E2 (5XP)
+  - [ ] E3 (10XP)
+- [ ] Module F
+  - [ ] F1 (5XP)
+  - [ ] F2 (8XP)
+  - [ ] F3 (2XP)
+  - [ ] F4 (10XP)
+- [ ] Module G
+  - [ ] G1 (10XP)
+
 ## Routes disponibles
 
-- [http://localhost:8080/](http://localhost:8080/)
-- [http://localhost:8080/citations](http://localhost:8080/citations)
-- [http://localhost:8080/citations/1](http://localhost:8080/citations/1)
-- [http://localhost:8080/citations/2](http://localhost:8080/citations/2)
+- [http://localhost:8080/activites-375e](http://localhost:8080/activites-375e) 
+  - Paramètres optionnels : 
+    - `du` et `au` : plage de dates de la forme `aaaa-mm-jj`. Valeurs par défaut :
+      entre aujourd'hui et demain.
+    - `rayon` : Le rayon en mètres
+    - `lat` et `lng` : Les coordonnées GPS. Valeurs par défaut : Les coordonnées
+      du pavillon PK de l'UQAM.
+- [http://localhost:8080/stations-bixi/1](http://localhost:8080/stations-bixi/1)
+- [http://localhost:8080/stations-bixi/2](http://localhost:8080/stations-bixi/2)

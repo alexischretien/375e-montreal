@@ -1,0 +1,49 @@
+#%RAML 0.8
+  ---
+  title: Activitees 375e API
+  baseUri: localhost:8080
+  version: v1
+  
+  /stations-bixis:
+    get:
+      description: Get a list of bixi stations that have a certain number of available bicycles that are within a certain radius from a geometric point. 
+      queryParameters:
+        min_bixi_dispo:
+          displayName: nbVelosDisponibles
+          type: number
+          desription: Fetch only the bixi stations with at least that number of available bicycles.
+          example: 10
+          required: false
+          default: 0
+        rayon:
+##########displayName:
+          type: number
+          description: Fetch only the bixi stations that are within that radius (int meters) of the desired geometric point.
+          example: 100.5
+          required: false
+          default: 1000
+        lat:
+          displayName: latitude
+          type: number
+          description: Fetch only the bixi stations that are within the desired radius of the desired geometric point at this latitude.
+          example: -25.32455
+          required: false
+          default: 45.5089306
+        lng:
+          displayName: longitude
+          type: number
+          description: Fetch only the bixi stations that are within the desired radius of the desired geometric point at this longitude.
+          example: -12.434654342
+          required: false
+          default: -73.5685676
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {            ,
+                             ,
+                }
+    /{id}
+    get:
+    
