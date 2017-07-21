@@ -87,12 +87,23 @@ public class FetchPisteTask {
    */
   private Piste asPiste(Feature f) {
 
+   
     PisteProperties p = f.properties;
     Geo g = f.geometry;
-      
-    return new Piste(p.id, p.id_trc_geo, p.type_voie, p.type_voie2, p.longueur,
-                    p.nbr_voie, p.separateur, p.saisons4, p.protege_4s, p.ville_mtl,
-                    p.nom_arr_ville, g.coordinates);
+    
+    return  new Piste(p.id, 
+                      p.id_trc_geo, 
+                      p.type_voie, 
+                      p.type_voie2, 
+                      p.longueur,
+                      p.nbr_voie, 
+                      p.separateur,
+                      p.saisons4, 
+                      p.protege_4s, 
+                      p.ville_mtl,
+                      p.nom_arr_ville, 
+                      g.coordinates);
+
   }
 }
 
