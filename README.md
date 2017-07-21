@@ -34,7 +34,7 @@ Alexis Chrétien (CHRA25049209)
   est de type `md5` dans le fichier `pg\bha.conf`:
 
     ```
-    /etc/postgresql/9.X/main/pg\_hba.conf
+     /etc/postgresql/9.X/main/pg\_hba.conf
     ```
 - Assurez-vous que le mot de passe de l'utilisateur `postgres` soit `postgres`
 - Installation de la base de données, des tables et des triggers : 
@@ -45,10 +45,10 @@ Alexis Chrétien (CHRA25049209)
     ```
 - Compilisation et exécution : 
 
-   ```
+    ```
      mvn compile
      mvn spring-boot:run
-   ```
+    ```
 
 Le projet est alors disponible à l'adresse [http://localhost:8080/](http://localhost:8080/)
 
