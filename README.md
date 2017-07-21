@@ -1,8 +1,8 @@
 # inf4375-projet-e2017
 
 Projet d'un site web basé sur le framework Spring-Boot utilisant des interfaces
-programmatiques de type REST HTTP/JSON et une interface visuelle de type Ajax dans 
-le cadre du cours INF4375 - Paradigmes des échanges internet.
+programmatiques de type REST HTTP/JSON dans le cadre du cours INF4375 - Paradigmes 
+des échanges internet.
 
 Le site web offre des fonctionnalités permettant d'obtenir des informations
 relatives aux activités de 375e de la Ville de Montréal ainsi que des stations bixis
@@ -28,21 +28,27 @@ Alexis Chrétien (CHRA25049209)
 - [Installation de PostgreSQL et de PostGIS pour Windows](http://www.bostongis.com/PrinterFriendly.aspx?content_name=postgis_tut01)
 - [PostgreSQL.app pour OSX](http://postgresapp.com/)
 
-## Compilation et exécution
+## Installation, compilation et exécution
 
 - Vérifier que le mode d'autentification de l'utilisateur postgresql `postgres`
-  est de type `md5` dans le fichier `pg\bha.conf` :
+  est de type `md5` dans le fichier `pg\bha.conf`:
 
-    $ /etc/postgresql/9.X/main/pg\_hba.conf
-
+    ```
+    /etc/postgresql/9.X/main/pg\_hba.conf
+    ```
+- Assurez-vous que le mot de passe de l'utilisateur `postgres` soit `postgres`
 - Installation de la base de données, des tables et des triggers : 
 
-    $ psql -U postgres -f migrations/create-database.sql
-    $ psql -U postgres -f migrations/create-schema.sql screencasts
-
+    ```
+     psql -U postgres -f migrations/create-database.sql
+     psql -U postgres -f migrations/create-schema.sql screencasts
+    ```
 - Compilisation et exécution : 
 
-    $ mvn spring-boot:run
+   ```
+     mvn compile
+     mvn spring-boot:run
+   ```
 
 Le projet est alors disponible à l'adresse [http://localhost:8080/](http://localhost:8080/)
 
@@ -82,11 +88,8 @@ Le projet est alors disponible à l'adresse [http://localhost:8080/](http://loca
 ## Routes disponibles
 
 - [http://localhost:8080/activites-375e](http://localhost:8080/activites-375e) 
-  - Paramètres optionnels : 
-    - `du` et `au` : plage de dates de la forme `aaaa-mm-jj`. Valeurs par défaut :
-      entre aujourd'hui et demain.
-    - `rayon` : Le rayon en mètres
-    - `lat` et `lng` : Les coordonnées GPS. Valeurs par défaut : Les coordonnées
-      du pavillon PK de l'UQAM.
-- [http://localhost:8080/stations-bixi/1](http://localhost:8080/stations-bixi/1)
-- [http://localhost:8080/stations-bixi/2](http://localhost:8080/stations-bixi/2)
+- [http://localhost:8080/stations-bixi](http://localhost:8080/stations-bixi/)
+- [http://localhost:8080/pistes-cyclables](http://localhost:8080/pistes-cyclables/)
+
+Veuilez vous référer au fichier `375e.raml` pour plus d'informations sur les APIs de
+l'application web. 
