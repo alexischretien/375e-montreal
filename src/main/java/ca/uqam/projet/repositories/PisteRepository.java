@@ -6,16 +6,15 @@
  * cyclables dans la table "pistes" de la base de données "screencasts".
  *
  * @Auteur  Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
 
 package ca.uqam.projet.repositories;
+import ca.uqam.projet.resources.*;
 
 import java.util.*;
 import java.util.stream.*;
 import java.sql.*;
-
-import ca.uqam.projet.resources.*;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.dao.*;
@@ -32,7 +31,7 @@ public class PisteRepository {
       " select"
     + "     id, id_trc_geobase, type_voie, type_voie2, longueur,"
     + "     nbr_voie, separateur, saisons4, protege_4s, ville_mtl,"
-    + "     nom_arr_ville, str_chemin"
+    + "     nom_arr_ville, coordinates"
     + " from"
     + "   pistes"
     + " where"
@@ -45,7 +44,7 @@ public class PisteRepository {
    * findByRadius - méthode permettant de retourner la liste des pistes se
    * trouvant à l'intérieur d'un certain rayon d'un point géométrique.
    *
-   * @param  rayon   Le rayon en mètre
+   * @param  rayon   Le rayon en mètres
    * @param  lng     La longitude du point géométrique
    * @param  lat     La latitude du point géométrique
    * @return         La liste de pistes
@@ -60,11 +59,12 @@ public class PisteRepository {
     }, new PisteRowMapper());
   } 
   
-  private static final String INSERT_STMT =
+  private static final String INSERT =
+
       " insert into pistes (id, id_trc_geobase, type_voie, type_voie2,"
     + "                     longueur, nbr_voie, separateur, saisons4," 
     + "                     protege_4s, ville_mtl, nom_arr_ville," 
-    + "                     str_chemin, geom_multilinestring)"
+    + "                     coordinates, geom_multilinestring)"
     + " values (?,?,?,?,?,?,?,?,?,?,?,?,ST_Transform(ST_GeomFromText(?, 2950), 4326))"
     + " on conflict (id) do update"
     + " set"  
@@ -78,7 +78,7 @@ public class PisteRepository {
     + "     , protege_4s     = ?"
     + "     , ville_mtl      = ?"
     + "     , nom_arr_ville  = ?"
-    + "     , str_chemin     = ?"
+    + "     , coordinates    = ?" 
     + "     , geom_multilinestring = ST_Transform(ST_GeomFromText(?, 2950), 4326)"
     ;
 
@@ -90,57 +90,38 @@ public class PisteRepository {
    * @return     Le nombre de lignes affectées par l'insertion ou la mise à jour
    */
   public int insert(Piste piste) {
+
     return jdbcTemplate.update(conn -> {
-      PreparedStatement ps = conn.prepareStatement(INSERT_STMT);
+      PreparedStatement ps = conn.prepareStatement(INSERT);
 
       ps.setDouble(1,  piste.getId());
       ps.setDouble(2,  piste.getId_trc_geobase());
-      ps.setInt   (3,  piste.getType_voie());
-      ps.setInt   (4,  piste.getType_voie2());
-      ps.setInt   (5,  piste.getLongueur());
-      ps.setInt   (6,  piste.getNbr_voie());
+      ps.setDouble(3,  piste.getType_voie());
+      ps.setDouble(4,  piste.getType_voie2());
+      ps.setDouble(5,  piste.getLongueur());
+      ps.setDouble(6,  piste.getNbr_voie());
       ps.setString(7,  piste.getSeparateur());
       ps.setString(8,  piste.getSaisons4());
       ps.setString(9,  piste.getProtege_4s());
       ps.setString(10, piste.getVille_mtl());
       ps.setString(11, piste.getNom_arr_ville());
-      ps.setString(12, piste.getCoordinates());
-      ps.setString(13, formatLineString(piste.getCoordinates())); 
+      ps.setString(12, piste.printCoordinates(true));
+      ps.setString(13, piste.printCoordinates(false)); 
 
       ps.setDouble(14, piste.getId_trc_geobase());
-      ps.setInt   (15, piste.getType_voie());
-      ps.setInt   (16, piste.getType_voie2());
-      ps.setInt   (17, piste.getLongueur());
-      ps.setInt   (18, piste.getNbr_voie());
+      ps.setDouble(15, piste.getType_voie());
+      ps.setDouble(16, piste.getType_voie2());
+      ps.setDouble(17, piste.getLongueur());
+      ps.setDouble(18, piste.getNbr_voie());
       ps.setString(19, piste.getSeparateur());
       ps.setString(20, piste.getSaisons4());
       ps.setString(21, piste.getProtege_4s());
       ps.setString(22, piste.getVille_mtl());
       ps.setString(23, piste.getNom_arr_ville());
-      ps.setString(24, piste.getCoordinates());
-      ps.setString(25, formatLineString(piste.getCoordinates()));
-
+      ps.setString(24, piste.printCoordinates(true));
+      ps.setString(25, piste.printCoordinates(false));
       return ps;
     });
-  }
-
-  /*
-   * formatLigneString - méthode permettant de formatter le format des
-   * coordonnées sous forme de String vers un format "MULTILINESTRING"
-   * insérable via postgresql + postgis. 
-   *
-   * @param  coord   Les coordonnées
-   * @return         Les coordonnées en format  traitable par
-   *                 postgresql + postgis.
-   */
-  String formatLineString(String coord) {
-    return  "MULTILINESTRING" + coord.replaceAll(" \\] \\], \\[ \\[ ", "),(")
-                                      .replaceAll(" \\], \\[ ", ",")
-                                      .replaceAll(", ", " ")
-                                      .replaceAll("\\[ \\[ \\[ ", "((")
-                                      .replaceAll(" \\] \\] \\]", "))")
-                                      .replaceAll("\\[ \\[ ","((")
-                                      .replaceAll(" \\] \\]", "))");
   }
 } 
 
@@ -150,19 +131,21 @@ public class PisteRepository {
  */
 class PisteRowMapper implements RowMapper<Piste> {
   public Piste mapRow(ResultSet rs, int rowNum) throws SQLException {
-    return new Piste(
+    Piste piste =  new Piste(
         rs.getDouble("id")
       , rs.getDouble("id_trc_geobase")
-      , rs.getInt   ("type_voie")
-      , rs.getInt   ("type_voie2")
-      , rs.getInt   ("longueur")
-      , rs.getInt   ("nbr_voie")
+      , rs.getDouble("type_voie")
+      , rs.getDouble("type_voie2")
+      , rs.getDouble("longueur")
+      , rs.getDouble("nbr_voie")
       , rs.getString("separateur")
       , rs.getString("saisons4")
       , rs.getString("protege_4s")
       , rs.getString("ville_mtl")
       , rs.getString("nom_arr_ville")
-      , rs.getString("str_chemin")
+      , null
     ); 
+    piste.setCoordinates(rs.getString("coordinates"));
+    return piste;
   } 
 }

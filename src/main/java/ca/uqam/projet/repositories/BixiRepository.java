@@ -5,7 +5,7 @@
  * bixi dans la table "bixis" de la base de données "screencasts".
  *
  * @Auteur  Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
 
 package ca.uqam.projet.repositories;
@@ -35,7 +35,7 @@ public class BixiRepository {
     + "   bixis"
     + " where"
     + "   ba >= ? and"
-    + "   ST_Distance_Spheroid(geometry_point, ST_GeomFromText(?,4326)) <= ?"
+    + "   ST_Distance_Sphere(geometry_point, ST_GeomFromText(?,4326)) <= ?"
     ;
 
 /*
@@ -80,7 +80,15 @@ public class BixiRepository {
    * @return        L'objet de clase Bixi associé à l'identifiant 
    */
   public Bixi findById(int id) {
-    return jdbcTemplate.queryForObject(FIND_BY_ID_STMT, new Object[]{id}, new BixiRowMapper());
+
+    Bixi bixi = null;
+
+    try {
+      bixi = jdbcTemplate.queryForObject(FIND_BY_ID_STMT, new Object[]{id}, new BixiRowMapper());
+    }
+    catch (EmptyResultDataAccessException e) {}
+
+    return bixi;
   }
   
 

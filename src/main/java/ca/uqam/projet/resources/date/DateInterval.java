@@ -4,51 +4,51 @@
  * DateInterval.java - Fichier source .java de la classe DateInterval
  *
  * @Auteur  Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
 
 
 package ca.uqam.projet.resources;
 
 import java.util.*;
-
+import java.util.regex.*;
 
 public class DateInterval {
 
   /*
    * Attributs
    */
-  private Date dateBegin;
-  private Date dateEnd;
+  private Date dateDebut;
+  private Date dateFin;
 
   /*
    * Constructeurs
    */
-  public DateInterval(Date dateBegin, Date dateEnd) {
+  public DateInterval(Date dateDebut, Date dateFin) {
 
-    this.dateBegin = dateBegin;
-    this.dateEnd   = dateEnd;
+    this.dateDebut = dateDebut;
+    this.dateFin   = dateFin;
   }
 
   /*
    * Getters 
    */  
-  public Date getDateBegin() { return dateBegin; }
-  public Date getDateEnd()   { return dateEnd; }
+  public Date getDateDebut() { return dateDebut; }
+  public Date getDateFin()   { return dateFin; }
   
 
   /*
    * Setters
    */
-  public void setDateBegin(Date date) { this.dateBegin = date; }
-  public void setDateEnd  (Date date) { this.dateEnd   = date; }
+  public void setDateDebut(Date date) { this.dateDebut = date; }
+  public void setDateFin  (Date date) { this.dateFin   = date; }
 
   /*
    * Méthodes
    */
   public String toString() { 
     
-    return String.format("[%s,%s]", dateBegin, dateEnd);
+    return String.format("[%s,%s]", dateDebut, dateFin);
   }
   
   /*
@@ -76,19 +76,26 @@ public class DateInterval {
    *                              de DateIntervals
    * @return                      la liste de DateIntervals
    */ 
-  public static List<DateInterval> StringtoList(String stringDateIntervals) {
+  public static List<DateInterval> stringToList(String stringDateIntervals) {
 
+    int a1, a2, m1, m2, j1, j2;
     Matcher m;
-    Pattern diPattern = Pattern.compile("^[?[(?<a1>\\d\\d\\d\\d)-(?<m1>\\d\\d)-(?<j1>\\d\\d\\),"
-                                          + "(?<a2>\\d\\d\\d\\d)-(?<m2>\\d\\d)-(?<j2>\\d\\d\\)]]?$");
+    Pattern diPattern = Pattern.compile("^\\[?\\[(?<a1>\\d\\d\\d\\d)\\-(?<m1>\\d\\d)\\-(?<j1>\\d\\d),"
+                                              + "(?<a2>\\d\\d\\d\\d)\\-(?<m2>\\d\\d)\\-(?<j2>\\d\\d)\\]\\]?$");
     List<DateInterval> dateIntervals = new ArrayList<DateInterval>();
- 
+    
     for (String di : stringDateIntervals.split(" ")) {
-        m = diPattern.matcher(di);
-
-        if (di.matches()) {
-          dateIntervals.add(new DateInterval(new Date(a1,m1,j1), new Date(a2,m2,j2));
-        }
+      m = diPattern.matcher(di);
+        
+      if (m.matches()) {
+        a1 = Integer.parseInt(m.group("a1"));
+        a2 = Integer.parseInt(m.group("a2"));
+        m1 = Integer.parseInt(m.group("m1"));
+        m2 = Integer.parseInt(m.group("m2"));
+        j1 = Integer.parseInt(m.group("j1"));
+        j2 = Integer.parseInt(m.group("j2")); 
+        dateIntervals.add(new DateInterval(new Date(a1, m1, j1), new Date(a2, m2, j2)));
+      }
     }
     return dateIntervals;
   }

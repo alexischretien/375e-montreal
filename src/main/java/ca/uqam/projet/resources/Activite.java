@@ -4,10 +4,12 @@
  * Activite.java - Fichier source .java de la classe Activite
  *
  * @Auteur Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
 
 package ca.uqam.projet.resources;
+
+import java.util.*;
 
 public class Activite {
 
@@ -53,29 +55,44 @@ public class Activite {
   /*
    * Getters  
    */
-  public int getId()                              { return id; }
-  public String getNom()                          { return nom; }
-  public String getDescription()                  { return description; }
-  public String getArrondissement_ou_pole()       { return arrondissement_ou_pole; }
-  public String getGratuit_ou_payant()            { return gratuit_ou_payant; }
-  public String getInterets_ou_type_evenement()   { return interets_ou_type_evenement; }
-  public String getInterieur_ou_exterieur()       { return interieur_ou_exterieur; }
-  public String getDates()                        { return dates; }
-  public List<DateInterval> getDates_formelles()  { return dates_formelles; }
-  public String getLieux()                        { return lieux; }
+  public int getId() { 
+    return id; 
+  }
+  public String getNom() { 
+    return nom; 
+  }
+  public String getDescription() { 
+    return description; 
+  }
+  public String getArrondissement_ou_pole() { 
+    return arrondissement_ou_pole; 
+  }
+  public String getGratuit_ou_payant() { 
+    return gratuit_ou_payant; 
+  }
+  public String getInterets_ou_type_evenement() { 
+    return interets_ou_type_evenement; 
+  }
+  public String getInterieur_ou_exterieur() { 
+    return interieur_ou_exterieur; 
+  }
+  public String getDates() { 
+    return dates; 
+  }
+  public List<DateInterval> getDates_formelles() { 
+    return dates_formelles; 
+  }
+  public String getLieux() { 
+    return lieux; 
+  }
 
   /* 
    * Méthodes
    */ 
   @Override public String toString() {
-    return String.format("%s -- %s -- %s -- %s -- %s -- %s -- %s -- %s -- %s ", nom, 
-                                                                         description, 
-                                                                         arrondissement_ou_pole, 
-                                                                         gratuit_ou_payant, 
-                                                                         interets_ou_type_evenement,
-                                                                         interieur_ou_exterieur,
-                                                                         dates,
-                                                                         dates_formelles, 
-                                                                         lieux);
+    return String.format("<<%s>> -- %s -- %s -- %s -- %s -- %s -- %s -- %s -- %s -- %s ", 
+                          id, nom, description, arrondissement_ou_pole, gratuit_ou_payant, 
+                          interets_ou_type_evenement, interieur_ou_exterieur, dates,
+                          dates_formelles, lieux);
   }
 }

@@ -6,7 +6,7 @@
  *  table "activites" de la base de données "screencasts". 
  *
  *  @Auteur Alexis Chrétien (CHRA25049209)
- *  @Version 8 juin 2017
+ *  @Version 21 juillet 2017
  */
 package ca.uqam.projet.repositories;
 
@@ -15,7 +15,7 @@ import java.util.stream.*;
 import java.sql.*;
 
 import ca.uqam.projet.resources.*;
-
+import ca.uqam.projet.resources.Date.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.dao.*;
 import org.springframework.jdbc.core.*;
@@ -27,6 +27,53 @@ public class ActiviteRepository {
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
+  private static final String FIND_ALL = 
+      " select"
+    + "   *"
+    + " from"
+    + "   activites"
+    + " order by"
+    + "   id"
+    ;
+
+  /*
+   * findAll - Retourne toutes les entrées d'activités contenue dans la base de données
+   *
+   * @return  La liste de toutes les activités
+   */
+  public List<Activite> findAll() {
+    return jdbcTemplate.query(FIND_ALL, new ActiviteRowMapper());
+  }
+
+  private static final String FIND_BY_RADIUS =
+      " select"
+    + "   *"
+    + " from"
+    + "   activites"
+    + " where"
+    + "   ST_Distance_Sphere(geometry_point, ST_GeomFromText(?,4326)) <= ?"
+    + " order by"
+    + "   id"
+    ;
+
+  /*
+   * findByRadius - Retourne les entrées d'activités se trouvant à l'intérieur d'un 
+   * certain rayon d'un certain point géographique. 
+   *
+   * @param  rayon   Le rayon en mètres
+   * @param  lng     La longitude du point géographique
+   * @param  lat     La latitude du point géographique
+   * @return         La liste des activités se trouvant dans le rayon
+   */
+  public List<Activite> findByRadius(double rayon, double lng, double lat) {
+    return jdbcTemplate.query(conn -> {
+      PreparedStatement ps = conn.prepareStatement(FIND_BY_RADIUS);
+      ps.setString(1, String.format("POINT(%f %f)", lng, lat));
+      ps.setDouble(2, rayon);
+      return ps;
+    }, new ActiviteRowMapper());
+  }
+ 
   private static final String FIND_FOR_GEO_UPDATE =
       " select"
     + "    *"  
@@ -40,7 +87,7 @@ public class ActiviteRepository {
     ; 
   
   /*
-   * findForGeoUpdate - méthode permettant de récupérer au plus 25 entrées
+   * findForGeoUpdate - Méthode permettant de récupérer au plus 25 entrées
    * d'activités dont les coordonnées géométriques ne sont pas à jour. 
    *
    * @return  Une liste contenant au plus 25 entrées d'activités dont les
@@ -67,7 +114,7 @@ public class ActiviteRepository {
     + "     , lieux = ?"
     ;
   /*
-   * insert - méthode permettant d'insérer une activité au de mettre à jour 
+   * insert - Méthode permettant d'insérer une activité ou de mettre à jour 
    * une entrée d'activité dans la table "activités". 
    *
    * S'il s'agit d'une insertion, la colonne de point géométrique sera vide :
@@ -79,8 +126,8 @@ public class ActiviteRepository {
    * reste inchangé.
    *
    * @param  activite   L'activite à insérer ou à mettre à jour
-   * @return            Le nombre de lignes de la table "activites" affectée 
-   *                    par l'insertion ou à mise à jour
+   * @return            Le nombre de lignes affectées par l'insertion ou la
+   *                    mise à jour. 
    */
   public int insert(Activite activite) {
     return jdbcTemplate.update(conn -> {
@@ -94,7 +141,7 @@ public class ActiviteRepository {
       ps.setString(6,  activite.getInterets_ou_type_evenement());
       ps.setString(7,  activite.getInterieur_ou_exterieur());
       ps.setString(8,  activite.getDates());
-      ps.setString(9,  DateInterval.listAsString(activite.getDates_formelles()));
+      ps.setString(9,  DateInterval.listToString(activite.getDates_formelles()));
       ps.setString(10, activite.getLieux());
 
       ps.setString(11, activite.getNom());
@@ -104,7 +151,7 @@ public class ActiviteRepository {
       ps.setString(15, activite.getInterets_ou_type_evenement());
       ps.setString(16, activite.getInterieur_ou_exterieur());
       ps.setString(17, activite.getDates());
-      ps.SetString(18, DateInterval.listAsString(activite.getDates_formelles()));
+      ps.setString(18, DateInterval.listToString(activite.getDates_formelles()));
       ps.setString(19, activite.getLieux());
       return ps;
     });
@@ -118,7 +165,7 @@ public class ActiviteRepository {
     ;
   
   /*
-   * update_geo - méthode permettant de mettre à jour la valeur de point
+   * update_geo - Méthode permettant de mettre à jour la valeur de point
    * géométrique d'une entrée d'activité de la table "activites". 
    *
    * Met également la valeur associée de la colonne "geo_a_jour" à "true".
@@ -181,7 +228,7 @@ class ActiviteRowMapper implements RowMapper<Activite> {
       , rs.getString("interets_ou_type_evenement")
       , rs.getString("interieur_ou_exterieur")
       , rs.getString("dates")
-      , DateInterval.stringAsList(rs.getString("dates_formelles"));
+      , DateInterval.stringToList(rs.getString("dates_formelles"))
       , rs.getString("lieux")
     );
   }

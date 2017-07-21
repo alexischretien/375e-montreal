@@ -1,11 +1,21 @@
+/*
+ * UQAM - Été 2017 - INF4375 - Groupe 30 - Projet de session
+ *
+ * FetchActiviteTask.java - Fichier source .java de la classe FetchActiviteTask.
+ * Une méthode périodique permet de récupérer et de sauvegarder les données des 
+ * activités du 375e de la Ville de Montréal à toutes les semaines.
+ *
+ * @Auteur  Alexis Chrétien (CHRA25049209)
+ * @Version 21 juillet 2017
+ */
+
 package ca.uqam.projet.tasks;
 
 import ca.uqam.projet.resources.*;
-
-import java.util.*;
 import ca.uqam.projet.repositories.*;
 
 import java.util.*;
+import java.util.regex.*;
 import java.util.stream.*;
 
 import com.fasterxml.jackson.annotation.*;
@@ -21,8 +31,10 @@ import org.springframework.web.client.*;
 import org.springframework.dao.*;
 
 import java.io.*;
-import java.lang.Object;
-import java.nio.charset.Charset;
+import java.lang.*;
+import java.nio.charset.*;
+
+import javax.annotation.PostConstruct;
 
 @Component
 public class FetchActiviteTask {
@@ -34,9 +46,9 @@ public class FetchActiviteTask {
 
   @Autowired private ActiviteRepository repository;
 
-  // Scheduled for very week (every monday at 12h10)
-  @Scheduled(cron="*/3 * * * * ?")
-//  @Scheduled(cron="0 10 12 ? * MON") 
+  // À toutes les semaines (Tous les lundi à 12h10)
+  @PostConstruct
+  @Scheduled(cron="0 10 12 ? * MON") 
   public void execute() {
 
     try {
@@ -62,26 +74,63 @@ public class FetchActiviteTask {
     } catch (HttpServerErrorException e) {
         log.warn("Caught an exception during FetchActiviteTask : " + e.toString());  
     }
-
   }
 
+
+  /*
+   * CsvActiviteParser - Méthode permettant d'extraire les données
+   * contenues dans le fichier de format .csv des activités du 375e de la
+   * Ville de Montréal. 
+   *
+   * @param corps   Le corps du fichier .csv
+   * @return        La liste d'activités
+   */
   private List<Activite> CsvActiviteParser(String corps) {
 
+    int id = 0;
     List<Activite> activites = new ArrayList<Activite>();
     corps = corps.substring(corps.indexOf('\n') + 1, corps.length());
     String[] lignes = corps.split("\r\n");
-
-    for(String ligne : lignes) {
-      String[] args = ligne.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-      List<DateInterval> dates = new FrenchDateParser().parse(args[7]);
-      activites.add(new Activite(Integer.parseInt(args[0]), args[1], args[2], args[3], 
-                                                  args[4],  args[5], args[6], DateInterval.listToString(dates), args[8]));  
-     
-      System.out.println(args[7]);
-      for (DateInterval date : dates) System.out.println(date);
-      System.out.println("\n");
+            
+    try {
+      for(String ligne : lignes) {
+        String[] args = ligne.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+        activites.add(new Activite(Integer.parseInt(args[0]), 
+                                   trimQuotationMarks(args[1]),
+                                   trimQuotationMarks(args[2]), 
+                                   trimQuotationMarks(args[3]), 
+                                   trimQuotationMarks(args[4]),  
+                                   trimQuotationMarks(args[5]), 
+                                   trimQuotationMarks(args[6]), 
+                                   trimQuotationMarks(args[7]), 
+                                   FrenchDateParser.parse(args[7]),
+                                   trimQuotationMarks(args[8])));
+      }
+    }
+    catch (ArrayIndexOutOfBoundsException e) {
+        log.warn("Caught an exception during FetchActiviteTask : " + e.toString());
     }
     return activites;
   }
+    
+  /*
+   * trimQuotationMarks - Méthode permettant d'enlever les guillemets en début
+   * et en fin d'une chaine de caractères
+   *
+   * @param   aString  la chaine à traiter
+   * @return           la chaine traitée
+   */
+  private String trimQuotationMarks (String aString) {
+
+    Pattern regEx = Pattern.compile("^\"(.*)\"$");
+    Matcher m = regEx.matcher(aString);
+    
+    if(m.matches()) {
+      aString = m.group(1);
+    }
+    return aString;
+  }
+
+
 }
 

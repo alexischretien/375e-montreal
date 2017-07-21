@@ -6,19 +6,20 @@
  *
  * @Auteur  : Alexis Chrétien - CHRA25049209 
  * @Version : 8 juin 2016
+ *
  */
 
 drop table if exists activites;
-
 create table activites (
-    id                         int    primary key
-  , nom                        text
+    id                         int   primary key 
+  , nom                        text  
   , description                text
   , arrondissement_ou_pole     text
   , gratuit_ou_payant          text
   , interets_ou_type_evenement text
   , interieur_ou_exterieur     text
   , dates                      text
+  , dates_formelles            text
   , lieux                      text
   , geo_a_jour                 bool
 );
@@ -53,21 +54,21 @@ select AddGeometryColumn ('public', 'bixis', 'geometry_point', 4326, 'POINT', 2,
 drop table if exists pistes;
 
 create table pistes (
-    id             int  primary key
-  , id_trc_geobase int 
-  , type_voie      int 
-  , type_voie2     int
-  , longueur       int
-  , nbr_voie       int
+    id             double precision  primary key
+  , id_trc_geobase double precision
+  , type_voie      double precision
+  , type_voie2     double precision
+  , longueur       double precision
+  , nbr_voie       double precision
   , separateur     text
   , saisons4       text
   , protege_4s     text
   , ville_mtl      text
   , nom_arr_ville  text
-  , str_chemin     text
+  , coordinates    text
 );
 
-select AddGeometryColumn ('public', 'pistes', 'geom_multilinestring', 4326, 'MULTILINESTRING', 2, false);
+select AddGeometryColumn ('public', 'pistes', 'geom_multilinestring', 4326, 'MULTILINESTRING', 3, false);
 
 
  create or replace function mise_a_jour_lieux()

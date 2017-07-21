@@ -1,7 +1,20 @@
+/*  
+ * UQAM - Été 2017 - INF4375 - Groupe 30 - Projet de session
+ *
+ * PisteController.java - Fichier source .java de la classe 
+ *                        PisteController, offrant un API
+ *                        pour traiter des requêtes relatives
+ *                        aux pistes cyclables stockées dans la base
+ *                        de données
+ * 
+ * @Auteur Alexis Chrétien (CHRA25049209)
+ * @Version 21 juillet 2017
+ */
+
 package ca.uqam.projet.controllers;
 
 import java.util.*;
-import java.time.LocalDate;
+import java.time.*;
 
 import ca.uqam.projet.repositories.*;
 import ca.uqam.projet.resources.*;
@@ -11,7 +24,7 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
-import org.hibernate.validator.constraints.*;
+
 
 @RestController
 public class PisteController {
@@ -21,32 +34,23 @@ public class PisteController {
   @RequestMapping(value = "/pistes-cyclables", method = RequestMethod.GET)
   public ResponseEntity<Map<String, Object>> findByRadius(@RequestParam(value = "rayon", 
                                                                         required = false,
-                                                                        defaultValue = "200") double rayon,
+                                                                        defaultValue = "200") Double rayon,
                                                           @RequestParam(value = "lat",
-                                                                        required = true) double lat,
+                                                                        required = true) Double lat,
                                                           @RequestParam(value = "lng", 
-                                                                        required = true) double lng) {
+                                                                        required = true) Double lng) {
 
+    List<Piste> pistes;
     ResponseEntity<Map<String, Object>> response;
-    Map<String, Object> body = new HashMap<String, Object>();
-    
-    if (rayon < 0   ||
-          lat   < -90  || lat > 90 ||
-          lng   < -180 || lng > 180) {
-        
-        body.put("code", 400);
-        body.put("error", "Invalid request parameters");
-        response = new ResponseEntity(body, null, HttpStatus.valueOf(400));
+
+    List<String> errors = GeographyValidator.validateGeography(rayon, lng, lat);
+
+    if (errors.size() > 0) {
+      response = new ResponseEntity(new Erreur(400, errors), null, HttpStatus.valueOf(400));
     }
     else {
-        body.put("code", 200);
-        body.put("message", "OK");
-        body.put("results", repository.findByRadius(rayon, lng, lat));
-        response = new ResponseEntity(body, null, HttpStatus.valueOf(200));
-         
-        for (Piste p : repository.findByRadius(rayon, lng, lat)) {
-            System.out.println(p.toString());
-        }
+      pistes = repository.findByRadius(rayon, lng, lat);
+      response = new ResponseEntity(pistes, null, HttpStatus.valueOf(200));
     }
     return response;
   }

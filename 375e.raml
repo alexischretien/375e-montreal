@@ -1,0 +1,367 @@
+#%RAML 1.0
+title: Système de requêtes sur les activités du 375e de la Ville de Montréal ainsi que sur les stations bixis et les pistes cyclables de la ville. 
+mediaType: application/json
+
+types:
+  Date:
+    properties:
+      annee: integer
+      mois: integer
+      jour: integer
+  example: |
+    {
+      "annee": 2017,
+      "mois": 4,
+      "jour": 25
+    }
+
+  DateInterval:
+    properties:
+      dateDebut: Date
+      dateFin: Date
+    example: |
+      {
+        "dateDebut":
+          {
+            "annee": 2017,
+            "mois": 4,
+            "jour": 25
+          },
+        "dateFin":
+          {
+            "annee": 2017,
+            "mois": 4,
+            "jour": 28
+          }
+      }
+
+  Erreur:
+    properties:
+      code: integer
+      message: string
+      erreurs: string[]
+    example: |
+     {
+       "code": 400,
+       "message": "Requête invalide",
+       "erreurs":          
+         [
+           "Format de la date 'du' invalide",
+           "Valeur de longitude plus petite que -180"
+         ]         
+     }
+
+  Activite:
+    properties:
+      id: integer
+      nom: string
+      arrondissement_ou_pole: string
+      gratuit_ou_payant: string
+      interets_ou_type_evenement: string
+      interieur_ou_exterieur: string
+      dates: string
+      dates_formelles: DateInterval[]
+      lieux: string
+    example: |
+      {
+        "id": 123,
+        "nom": "Concert en plein air",
+        "arrondissement_ou_pole" : "Outremont",
+        "gratuit_ou_payant": "Gratuit", 
+        "interets_ou_type_evenement": "Concert", 
+        "interieur_ou_exterieur": "Exterieur",
+        "dates": "Du premier au 3 septembre", 
+        "dates_formelles": 
+          [
+            {
+              "dateDebut":
+                {
+                  "annee": 2017,
+                  "mois": 4,
+                  "jour": 25
+                },
+              "dateFin":
+                {
+                  "annee": 2017,
+                  "mois": 4,
+                  "jour": 28
+                }
+            },
+            {
+              "dateDebut":
+                {
+                  "annee": 2017,
+                  "mois": 5,
+                  "jour": 15
+                },
+              "dateFin":
+                {
+                  "annee": 2017,
+                  "mois": 7,
+                  "jour": 16
+                }
+            }
+          ],
+        "lieux": "123 fake street"
+      }  
+
+  Bixi: 
+    properties:
+      id: integer
+      nom: string
+      idTerminal: string
+      etat: integer
+      estBloquee: boolean
+      estSuspendue: boolean
+      estHorsService: boolean
+      derniereMiseAJour: integer
+      derniereCommunication: integer
+      bk: boolean
+      bl: boolean
+      latitude: number
+      longitude: number
+      nbBornesDisponibles: integer
+      nbBornesIndisponibles: integer
+      nbVelosDisponibles: integer
+      nbVelosIndisponibles: integer
+    example: |
+      {
+        "id": 65,
+        "nom": "Mansfield / Sherbrooke",
+        "idTerminal": "6068",
+        "etat": 1,
+        "estBloquee": false,
+        "estSuspendue": false,
+        "estHorsService": false,
+        "derniereMiseAJour": 1500647302462,
+        "derniereCommunication": 1500647302913,
+        "bk": false,
+        "bl": false,
+        "latitude": 45.50297,
+        "longitude": -73.57505,
+        "nbBornesDisponibles": 5,
+        "nbBornesIndisponibles": 0,
+        "nbVelosDisponibles": 26,
+        "nbVelosIndisponibles": 0
+      }               
+  
+  Piste:
+    properties:
+      id: number
+      id_trc_geobase: number
+      type_voie: number
+      type_voie2: number
+      longueur: number
+      nbr_voie: number
+      separateur: string
+      saisons4: string
+      protege_4s: string
+      ville_mtl: string
+      nom_arr_ville: string
+      coordinates: number[][][] 
+    example: |
+      {
+        "id": 6572,
+        "id_trc_geobase": 1613417,
+        "type_voie": 3,
+        "type_voie2": 0,
+        "longueur": 81,
+        "nbr_voie": 1,
+        "separateur": "P",
+        "saisons4": "OUI",
+        "protege_4s": "NON",
+        "ville_mtl": "OUI",
+        "nom_arr_ville": "Anjou",
+        "coordinates":
+          [
+            [
+              [
+                269588.42432655196,
+                5030889.44456851,
+                0.0
+              ],
+              [
+                269590.18831624236,
+                5030897.938566135,
+                0.0
+              ],
+              [
+                269593.5456649121,
+                5030911.505588453,
+                0.0   
+              ]
+            ]
+          ]
+      }
+          
+/activites-375e:
+  get: 
+    description: Retourne la liste des activites en fonction des paramètres donnés.
+    queryParameters:
+      rayon:
+        description: Le rayon en mètres à partir du point de longitude 'lng' et de latitude 'lat'. Doit être strictement positif. N'utilise pas la valeur par défaut si 'rayon', 'lng' et 'lat' ne sont pas spécifiés.
+        required: false
+        type: number
+        example: 512.12764
+        default: 5000
+      lat:
+        description: La latitude du point pour rechercher les activités à l'intérieur d'un certain rayon. Doit être entre -90 et 90. N'utilise pas la valeur par défaut si 'rayon', 'lng' et 'lat' ne sont pas spécifiés.
+        required: false
+        type: number
+        example: -32.054
+        default: 45.5089306
+      lng:
+        description: La longitude du point pour rechercher les activités à l'intérieur d'un certain rayon. Doit être entre -180 et 180. N'utilise pas la valeur par défaut si 'rayon', 'lng' et 'lat' ne sont pas spécifiés.
+        required: false
+        type: number
+        example: 176.0923
+        default: -73.5685676
+      du:
+        description: Date de début pour rechercher les activités à l'intérieur d'une certaine intervalle de dates. Doit être une date valide respectant le format 'aaaa-mm-jj'. N'utilise pas la valeur par défaut si 'du' et 'au' ne sont pas spécifiés. La valeur par défaut est la date d'aujourd'hui.
+        required: false
+        type: string
+        example: "2017-04-24"
+      au: 
+        description: Date de fin pour rechercher les activites à l'intérieur d'une certaine intervalle de dates. Doit être une date valide respectant le format 'aaaa-mm-jj'. N'utilise pas la valeur par défaut si 'du' et 'au' ne sont pas spécifiés. La valeur par défaut est la date de demain.
+        required: false
+        type: string
+        example: "2017-05-21"
+    responses:
+      200: 
+        description: La liste des activités.
+        body:
+          type: Activite[]
+      400:
+        description: Erreur client causée par le non-respect des contraintes sur les paramètres. 
+        body:
+          type: Erreur
+          example: | 
+            {
+              "code": 400,
+              "message": "Requête invalide",
+              "erreurs":                 
+                [
+                  "Format de la date 'au' invalide",
+                  "Valeur de longitude plus grande que 180",
+                  "Valeur de latitude plus petite que -90"       
+                ]                         
+            }
+    
+/stations-bixi
+  get:
+    description: Retourne la liste des stations Bixi en fonction des paramètres donnés. Au moins un des paramètres spécifié doit avoir été donné. 
+    queryParameters:
+      rayon: 
+        description: Le rayon en mètres à partir du point de longitude 'lng' et de latitude 'lat'. Doit être strictement positif.
+          required: false
+          type: number
+          example: 512.54
+          default: 1000
+        lat:
+          description: La latitude du point pour rechercher les stations à l'intérieur d'un certain rayon. Doit être entre -90 et 90.
+          required: false
+          type: number
+          example: -32.054
+          default: 45.5089306
+        lng:
+          description: La longitude du point pour rechercher les stations à l'intérieur d'un certain rayon. Doit être entre -180 et 180.
+          required: false
+          type: number
+          example: 176.0923
+          default: -73.5685676
+        min_bixi_dispo:
+          description: Permet de ne retourner que les stations qui possède au minimum un certain nombre de vélos disponibles. Doit être positif.
+          required: false
+          type: integer
+          example: 13
+          default: 0
+      responses:
+        200:
+          description: La liste des stations Bixi
+          body:
+            type: Bixi[]
+        400:
+          description: Erreur client causée par le non-respect des contraintes sur les paramètres.
+          body:
+            type: Erreur
+            example:
+              { |
+                "code": 400,
+                "message": "Requête invalide",
+                "erreurs":
+                  [
+                    "Aucun paramètre donné pour la requête"
+                  ]
+              }
+  /{bixiId}
+    get:
+      description: Retourne une station Bixi en particulier selon son identifiant.
+        responses:
+          200:
+            description: La station Bixi correspondant à l'identifiant 'bixiId'.
+            body:
+              type: Bixi
+          400:
+            description: Erreur client causée par le non-respect des contraintes sur le paramètre.
+            body:
+              type: Erreur
+              example: |
+                {
+                  "code": 400,
+                  "message": "Requête invalide",
+                  "erreurs":                 
+                    [
+                      "Format de l'identifiant de la station Bixi invalide"
+                    ]
+                }
+          404:
+            description: Il n'existe aucune station Bixi pour l'identifiant 'bixiId'.
+            body:
+              type: Erreur
+                example: |
+                  {
+                    "code": 404,
+                    "message": "Ressource inexistante",
+                    "erreurs":
+                      [
+                        "Aucune station Bixi ne possède l'identifiant spécifié"
+                      ]
+                  }
+
+/pistes-cyclables
+  get:
+    description: Retourne la liste des pistes cyclables en fonction des paramètres donnés.
+    queryParameters:
+      rayon:
+        description: Le rayon en mètres à partir du point de longitude 'lng' et de latitude 'lat'. Doit être strictement positif.
+        required: false
+        type: number
+        example: 4380.5
+        default: 200
+      lat: La latitude du point pour rechercher les pistes à l'intérieur d'un certain rayon. Doit être entre -90 et 90.
+        required: true
+        type: number
+        example: -23.564743
+      lng: La longitude du point pour rechercher les pistes à l'intérieur d'un certain rayon. Doit être entre -180 et 180.
+        required: true
+        type: number
+        example: 74.3134
+    responses:
+      200:
+        description: La liste des pistes-cyclables
+        body:
+          type: Piste[]     
+      400:
+        description: Erreur client causée par le non-respect des contraintes sur le paramètre.
+        body:
+          type: Erreur
+            example: |
+              {
+                "code": 400,
+                "message": "Requête invalide",
+                "erreurs":
+                  [
+                    "Valeur de rayon plus petite ou égale à 0",
+                    "Valeur de latitude plus grande que 90" 
+                  ]
+              }

@@ -4,12 +4,10 @@
  * Bixi.java - Fichier source .java de la classe Bixi
  *
  * @Auteur  Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
 
 package ca.uqam.projet.resources;
-
-import com.fasterxml.jackson.annotation.*;
 
 public class Bixi {
 
@@ -62,23 +60,57 @@ public class Bixi {
   /*
    * Getters 
    */
-  @JsonProperty public  int     getId()                    { return id;  }
-  @JsonProperty public  String  getNom()                   { return nom; }
-  @JsonProperty public  String  getIdTerminal()            { return idTerminal; }
-  @JsonProperty public  int     getEtat()                  { return etat; }
-  @JsonProperty public  boolean getEstBloquee()            { return estBloquee; }
-  @JsonProperty public  boolean getEstSuspendue()          { return estSuspendue; }
-  @JsonProperty public  boolean getEstHorsService()        { return estHorsService; }
-  @JsonProperty public  long    getDerniereMiseAJour()     { return derniereMiseAJour; }
-  @JsonProperty public  long    getDerniereCommunication() { return derniereCommunication; }
-  @JsonProperty public  boolean getBk()                    { return bk; }
-  @JsonProperty public  boolean getBl()                    { return bl; }
-  @JsonProperty public  double  getLatitude()              { return latitude; }
-  @JsonProperty public  double  getLongitude()             { return longitude; }
-  @JsonProperty public  int     getNbBornesDisponibles()   { return nbBornesDisponibles; }
-  @JsonProperty public  int     getNbBornesIndisponibles() { return nbBornesIndisponibles; }
-  @JsonProperty public  int     getNbVelosDisponibles()    { return nbVelosDisponibles; }
-  @JsonProperty public  int     getNbVelosIndisponibles()  { return nbVelosIndisponibles; }
+  public int getId() { 
+    return id;  
+  }
+  public String getNom() { 
+    return nom; 
+  }
+  public String getIdTerminal() { 
+    return idTerminal; 
+  }
+  public int getEtat() { 
+    return etat; 
+  }
+  public boolean getEstBloquee() { 
+    return estBloquee; 
+  }
+  public boolean getEstSuspendue() { 
+    return estSuspendue; 
+  }
+  public boolean getEstHorsService() { 
+    return estHorsService; 
+  }
+  public long getDerniereMiseAJour() { 
+    return derniereMiseAJour; 
+  }
+  public long getDerniereCommunication() { 
+    return derniereCommunication; 
+  }
+  public boolean getBk() { 
+    return bk; 
+  }
+  public boolean getBl() { 
+    return bl; 
+  }
+  public double getLatitude() { 
+    return latitude; 
+  }
+  public double getLongitude() { 
+    return longitude; 
+  }
+  public int getNbBornesDisponibles() { 
+    return nbBornesDisponibles; 
+  }
+  public int getNbBornesIndisponibles() { 
+    return nbBornesIndisponibles; 
+  }
+  public int getNbVelosDisponibles() { 
+    return nbVelosDisponibles; 
+  }
+  public int getNbVelosIndisponibles() { 
+    return nbVelosIndisponibles; 
+  }
 
   /*
    * Méthodes

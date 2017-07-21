@@ -1,8 +1,17 @@
+/*
+ * UQAM - Été 2017 - INF4375 - Groupe 30 - Projet de session
+ *
+ * FetchBixiTask.java - Fichier source .java de la classe FetchBixiTask.
+ * Une méthode périodique permet de récupérer et de sauvegarder les données
+ * des stations bixi à toutes les 10 minutes.
+ *
+ * @Auteur   Alexis Chrétien (CHRA25049209)
+ * @Version  21 juillet 2017
+ */
+
 package ca.uqam.projet.tasks;
 
 import ca.uqam.projet.resources.*;
-
-import java.util.*;
 import ca.uqam.projet.repositories.*;
 
 import java.util.*;
@@ -23,6 +32,8 @@ import org.springframework.dao.*;
 import java.io.*;
 import java.lang.Object;
 
+import javax.annotation.PostConstruct;
+
 @Component
 public class FetchBixiTask {
 
@@ -30,7 +41,8 @@ public class FetchBixiTask {
   private static final String URL = "http://secure.bixi.com/data/stations.json";
   @Autowired private BixiRepository repository;
   
-  // Scheduled for every 10 minutes
+  // À tous les 10 minutes
+  @PostConstruct
   @Scheduled(cron="0 */10 * * * ?") 
   public void execute() {
 
@@ -38,7 +50,7 @@ public class FetchBixiTask {
       JsonBixiResponse response = new RestTemplate().getForObject(URL, JsonBixiResponse.class);
       Arrays.asList(response.jsonBixis).stream()
         .map(this::asBixi)
-        .peek(c -> log.info(c.toString()))
+        .peek(b -> log.info(b.toString()))
         .forEach(repository::insert)
         ;
       
@@ -50,12 +62,24 @@ public class FetchBixiTask {
           log.warn("Caught an exception during FetchBixiTask : " + e.toString());
       }
   }
+
+  /*
+   * asBixi - Méthode permettant de générer un objet de classe Bixi via
+   * les données contenu dans un objet "JsonBixi"
+   *
+   * @param  b   l'objet "JsonBixi" contenant les données d'initialisations
+   *             de l'objet "Bixi"
+   * @return     l'objet "Bixi" correspondant
+   */
   private Bixi asBixi(JsonBixi b) {
     return new Bixi(b.id, b.s,  b.n,  b.st, b.b,  b.su, b.m,  b.lu, b.lc, 
                     b.bk, b.bl, b.la, b.lo, b.da, b.dx, b.ba, b.bx);
   }
 }
 
+/*
+ * Classes JsonBixiResponse et JsonBixi pour la désérialisation 
+ */
 class JsonBixiResponse {
   @JsonProperty("stations")        JsonBixi[] jsonBixis;
   @JsonProperty("schemeSuspended") String     schemeSuspended;

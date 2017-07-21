@@ -6,13 +6,11 @@
  * exprimées en français naturel en des listes de DateIntervals.
  *
  * @Auteur  Alexis Chrétien (CHRA25049209)
- * @Version 8 juin 2017
+ * @Version 21 juillet 2017
  */
-
 
 package ca.uqam.projet.resources;
 
-import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
@@ -21,6 +19,7 @@ public class FrenchDateParser {
   /*
    * Constantes
    */
+  public static final String JOUR_PREFIX = "(à partir (de|du)|arrivée le|depuis le|dès le|du|de|d'|le|jusqu'au|de retour le|fin|début)";
   public static final String MOIS = "(janvier|février|mars|avril|mai|juin|juillet|" +
                                     "août|septembre|octobre|novembre|décembre)";
   public static final String JOUR_SEM = "(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)";
@@ -28,12 +27,21 @@ public class FrenchDateParser {
 
 
   /*
-   * Méthodes
+   * parse - méthode permettant de retourner une lsite de DateIntervals à partir
+   * d'une expression en francais naturel
+   *
+   * @param  expression   L'expression en francais naturel
+   * @return              La liste de DateIntervals correspondant
    */
   public static List<DateInterval> parse(String expression) {
 
-    return deduceMissingInfo(execute(new ArrayList<DateInterval>(), 
-                                     expression.toLowerCase()));
+    List<DateInterval> dateIntervals = execute(new ArrayList<DateInterval>(),
+                                               expression.toLowerCase());
+
+    dateIntervals = deduceMissingInfo(dateIntervals);
+    dateIntervals = mergeIntervals(dateIntervals);
+
+    return dateIntervals;
   }
 
   /*
@@ -47,14 +55,14 @@ public class FrenchDateParser {
    *                se remplit si la fonction effectue des appels récursifs)
    * @return        La liste de DateIntervals associée à l'expression en français naturel
    */
-  private List<DateInterval> execute(List<DateInterval> dates, String expression) {
+  private static List<DateInterval> execute(List<DateInterval> dates, String expression) {
     
     Matcher m; 
     Date date1;
     Date date2;
     
     Pattern etStatement = Pattern.compile("^(\")?(?<expression1>(.*?))( )*(,| et )( )*(?<expression2>.*)(\")?$");
-    Pattern auStatement = Pattern.compile("^(\")?(?<date1>.*?)( )*( au | à )( )*(?<date2>.*)(\")?$");
+    Pattern auStatement = Pattern.compile("^(\")?(?<date1>.*?)( )*( au | à |-)( )*(?<date2>.*)(\")?$");
 
     expression = expression.trim(); 
 
@@ -88,15 +96,15 @@ public class FrenchDateParser {
    *                      n'est pas une date, retourne un objet Date avec -1 comme
    *                      attribut jour, mois et annee. 
    */
-  private Date parseJour(String expression) {
+  private static Date parseJour(String expression) {
   
     Date date;
     Matcher  m;
 
     expression = expression.trim(); 
     
-    Pattern jmaStatement  = Pattern.compile("^(\")?(du |de |d')?(?<jour>\\d?\\d)?( )*(?<mois>" 
-                                            + MOIS + ")?( )*(?<annee>\\d\\d\\d\\d)?(\")?$");
+    Pattern jmaStatement  = Pattern.compile("^(\")?" + JOUR_SEM + "?" + JOUR_PREFIX + "?( )*(?<jour>\\d?\\d)?(er)?" +
+                                            "( )*(?<mois>" + MOIS + ")?( )*(?<annee>\\d\\d\\d\\d)?(.*)?$");
  
     if ((m = jmaStatement.matcher(expression)).matches()) {
       date = new Date(m.group("annee"), m.group("mois"), m.group("jour"));
@@ -113,20 +121,20 @@ public class FrenchDateParser {
    * d'une liste de DateIntervals. 
    *
    * Une information manquante est charactérisée par un -1 comme attribut jour, 
-   * mois ou annee d'un attribut dateBegin ou dateEnd d'un element de la liste
+   * mois ou annee d'un attribut dateDebut ou dateFin d'un element de la liste
    * de DateInterval. 
    *
    * @param  di   La liste de DateIntervals manquant potentiellement des données
    * @return      La liste de DateIntervals avec les données manquantes  déduites
    */
-  private List<DateInterval> deduceMissingInfo(List<DateInterval> di) {
+  private static List<DateInterval> deduceMissingInfo(List<DateInterval> di) {
      
     Date date1;
     Date date2;
     
     for (int i = di.size() - 1 ; i >= 0 ; --i) {        
-      date1 = di.get(i).getDateEnd();
-      date2 = di.get(i).getDateBegin();
+      date1 = di.get(i).getDateFin();
+      date2 = di.get(i).getDateDebut();
 
       if (date1.getMois() == -1 && date2.getMois() == -1) {
           di.remove(i);
@@ -151,12 +159,12 @@ public class FrenchDateParser {
           date2.setJour(1);
         }
  
-        di.get(i).setDateEnd(date1);
-        di.get(i).setDateBegin(date2);
+        di.get(i).setDateFin(date1);
+        di.get(i).setDateDebut(date2);
 
         if (i > 0) {
           date1 = date2;
-          date2 = di.get(i-1).getDateEnd();
+          date2 = di.get(i-1).getDateFin();
       
           if (date1.getAnnee() == -1 && date1.getAnnee() == -1) {
             date1.setAnnee(CURRENT_YEAR);
@@ -168,8 +176,8 @@ public class FrenchDateParser {
           if (date1.getMois() != -1 && date2.getMois() == -1) {
             date2.setMois(date1.getMois());
           }
-          di.get(i).setDateBegin(date1);
-          di.get(i-1).setDateEnd(date2);
+          di.get(i).setDateDebut(date1);
+          di.get(i-1).setDateFin(date2);
         }
       }
     }
@@ -177,13 +185,36 @@ public class FrenchDateParser {
   }
   
   /*
+   * mergeIntervals - méthode qui combine les intervalles de dates d'une liste
+   * de dateIntervals si la date de fin d'un élément est la date de début ou 
+   * le jour précédant de l'élément suivant. 
+   *
+   * @param  di               La liste de dateIntervals
+   * @return                  La liste de dateIntervals dont les intervalles 
+   *                          de dates consécutives ont été combinées
+   */
+
+  private static List<DateInterval> mergeIntervals(List<DateInterval> di) {
+    
+    for (int i = 0 ; i < di.size() - 1 ; ++i) {
+      while (i < di.size() - 1 &&
+             (di.get(i).getDateFin().isSame(di.get(i + 1).getDateDebut()) ||
+              di.get(i).getDateFin().isEve (di.get(i + 1).getDateDebut()))) {
+
+        di.set(i, new DateInterval(di.get(i).getDateDebut(), di.get(i + 1).getDateFin()));
+        di.remove(i + 1);    
+      } 
+    }
+    return di;
+  }
+  /*
    * nbJours - méthode permettant de retourner le nombre de jours maximum
    * associé à un mois. 
    *
    * @param  mois   L'entier associé à un mois (1 = janvier, 12 - décembre)
    * @return        Le nombre de jours du mois
    */
-  private int nbJours(int mois) {
+  private static int nbJours(int mois) {
     if (mois == 1 || mois == 3 || mois == 5 ||
         mois == 7 ||mois == 9 || mois == 11) {
       return 31;
@@ -192,7 +223,7 @@ public class FrenchDateParser {
       return 30;
     }
     else {
-      return 28;
+      return 29;
     }  
  }
 }  
