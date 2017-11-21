@@ -31,7 +31,7 @@ Alexis Chrétien (CHRA25049209)
 ## Installation, compilation et exécution
 
 - Vérifier que le mode d'autentification de l'utilisateur postgresql `postgres`
-  est de type `md5` dans le fichier `pg\bha.conf`:
+  est de type `md5` dans le fichier `pg\_bha.conf`:
 
     ```
      /etc/postgresql/9.X/main/pg\_hba.conf
@@ -43,7 +43,7 @@ Alexis Chrétien (CHRA25049209)
      psql -U postgres -f migrations/create-database.sql
      psql -U postgres -f migrations/create-schema.sql screencasts
     ```
-- Compilisation et exécution : 
+- Compilation et exécution : 
 
     ```
      mvn compile
@@ -91,5 +91,5 @@ Le projet est alors disponible à l'adresse [http://localhost:8080/](http://loca
 - [http://localhost:8080/stations-bixi](http://localhost:8080/stations-bixi/)
 - [http://localhost:8080/pistes-cyclables](http://localhost:8080/pistes-cyclables/)
 
-Veuilez vous référer au fichier `375e.raml` pour plus d'informations sur les APIs de
+Veuillez vous référer au fichier `375e.raml` pour plus d'informations sur les APIs de
 l'application web. 
