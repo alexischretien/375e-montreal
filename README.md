@@ -31,10 +31,10 @@ Alexis Chrétien (CHRA25049209)
 ## Installation, compilation et exécution
 
 - Vérifier que le mode d'autentification de l'utilisateur postgresql `postgres`
-  est de type `md5` dans le fichier `pg\_bha.conf`:
+  est de type `md5` dans le fichier `pg_bha.conf`:
 
     ```
-     /etc/postgresql/9.X/main/pg\_hba.conf
+     /etc/postgresql/9.X/main/pg_hba.conf
     ```
 - Assurez-vous que le mot de passe de l'utilisateur `postgres` soit `postgres`
 - Installation de la base de données, des tables et des triggers : 
@@ -51,39 +51,6 @@ Alexis Chrétien (CHRA25049209)
     ```
 
 Le projet est alors disponible à l'adresse [http://localhost:8080/](http://localhost:8080/)
-
-## Status
-
-- [ ] Module A
-  - [ ] A1 (5XP)
-  - [x] A2 (8XP)
-  - [x] A3 (5XP)
-  - [ ] A4 (5XP)
-- [ ] Module B
-  - [ ] B1 (5XP)
-  - [ ] B2 (5XP)
-  - [ ] B3 (5XP)
-  - [ ] B4 (2XP)
-- [ ] Module C
-  - [x] C1 (5XP)
-  - [x] C2 (2XP)
-  - [x] C3 (5XP)
-  - [ ] C4 (5CP)
-- [ ] Module D
-  - [x] D1 (5XP)
-  - [x] D2 (10XP)
-  - [ ] D3 (5XP)
-- [ ] Module E
-  - [ ] E1 (10XP)
-  - [ ] E2 (5XP)
-  - [ ] E3 (10XP)
-- [ ] Module F
-  - [ ] F1 (5XP)
-  - [ ] F2 (8XP)
-  - [ ] F3 (2XP)
-  - [ ] F4 (10XP)
-- [ ] Module G
-  - [ ] G1 (10XP)
 
 ## Routes disponibles
 
